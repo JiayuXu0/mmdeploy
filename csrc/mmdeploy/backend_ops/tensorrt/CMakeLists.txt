@@ -1,14 +1,14 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-project(mmdeploy_tensorrt_ops)
+project(dbdeploy_tensorrt_ops)
 
 include(${CMAKE_SOURCE_DIR}/cmake/tensorrt.cmake)
 
 # cub
-if (NOT DEFINED CUB_ROOT_DIR)
-    if (CUDA_VERSION VERSION_LESS 11.0)
-        set(CUB_ROOT_DIR "${CMAKE_SOURCE_DIR}/third_party/cub")
-    endif ()
-endif ()
+if(NOT DEFINED CUB_ROOT_DIR)
+        if(CUDA_VERSION VERSION_LESS 11.0)
+                set(CUB_ROOT_DIR "${CMAKE_SOURCE_DIR}/third_party/cub")
+        endif()
+endif()
 
 file(GLOB_RECURSE BACKEND_OPS_SRCS *.cpp *.cu)
 add_library(${PROJECT_NAME}_obj OBJECT "${BACKEND_OPS_SRCS}")

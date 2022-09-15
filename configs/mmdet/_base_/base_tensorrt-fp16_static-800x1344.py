@@ -3,7 +3,7 @@ _base_ = ['./base_static.py', '../../_base_/backends/tensorrt-fp16.py']
 onnx_config = dict(input_shape=(1344, 800))
 
 backend_config = dict(
-    common_config=dict(max_workspace_size=1 << 30),
+    common_config=dict(max_workspace_size=1 << 30,fp16_mode=True),
     model_inputs=[
         dict(
             input_shapes=dict(

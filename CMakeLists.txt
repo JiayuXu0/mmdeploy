@@ -1,7 +1,8 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-if (NOT DEFINED CMAKE_INSTALL_PREFIX)
+if(NOT DEFINED CMAKE_INSTALL_PREFIX)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "installation directory")
-endif ()
+endif()
+
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
 cmake_minimum_required(VERSION 3.14)
@@ -14,11 +15,13 @@ set(MMDEPLOY_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set(MMDEPLOY_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-if (MSVC)
+
+if(MSVC)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-else ()
+else()
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-endif ()
+endif()
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # options
@@ -40,43 +43,43 @@ set(MMDEPLOY_TARGET_DEVICES "cpu" CACHE STRING "target devices to support")
 set(MMDEPLOY_TARGET_BACKENDS "" CACHE STRING "target inference engines to support")
 set(MMDEPLOY_CODEBASES "all" CACHE STRING "select OpenMMLab codebases")
 
-if (NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "choose 'Release' as default build type" FORCE)
-endif ()
+endif()
 
-if (MMDEPLOY_SHARED_LIBS)
+if(MMDEPLOY_SHARED_LIBS)
     set(MMDEPLOY_LIB_TYPE SHARED)
-else ()
+else()
     set(MMDEPLOY_LIB_TYPE STATIC)
-endif ()
+endif()
 
 set(MMDEPLOY_TASKS "" CACHE INTERNAL "")
 
-if (MMDEPLOY_COVERAGE)
+if(MMDEPLOY_COVERAGE)
     add_compile_options(-coverage -fprofile-arcs -ftest-coverage)
     add_link_options(-coverage -lgcov)
-endif ()
+endif()
 
 # when CUDA devices are enabled, the environment variable ASAN_OPTIONS=protect_shadow_gap=0
 # must be set at runtime
-if (MMDEPLOY_ASAN_ENABLE)
+if(MMDEPLOY_ASAN_ENABLE)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fsanitize=address>)
     add_link_options(-fsanitize=address)
-endif ()
+endif()
 
 # notice that ubsan has linker issues for ubuntu < 18.04, see
 # https://stackoverflow.com/questions/50024731/ld-unrecognized-option-push-state-no-as-needed
-if (MMDEPLOY_UBSAN_ENABLE)
+if(MMDEPLOY_UBSAN_ENABLE)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fsanitize=undefined>)
     add_link_options(-fsanitize=undefined)
-endif ()
+endif()
 
-if (MSVC)
+if(MSVC)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/diagnostics:classic>)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/Zc:preprocessor>) # /experimental:preprocessor on VS2017
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/wd4251>)
-endif ()
+endif()
 
 if(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fobjc-arc")
@@ -86,9 +89,9 @@ add_library(MMDeployStaticModules INTERFACE)
 add_library(MMDeployDynamicModules INTERFACE)
 add_library(MMDeployLibs INTERFACE)
 
-if ((cuda IN_LIST MMDEPLOY_TARGET_DEVICES) OR (trt IN_LIST MMDEPLOY_TARGET_BACKENDS))
+if((cuda IN_LIST MMDEPLOY_TARGET_DEVICES) OR(trt IN_LIST MMDEPLOY_TARGET_BACKENDS))
     include(cmake/cuda.cmake NO_POLICY_SCOPE)
-endif ()
+endif()
 
 # this must come after including cuda.cmake because policies in function scope is captured
 # at function definition
@@ -96,82 +99,86 @@ include(cmake/MMDeploy.cmake)
 
 add_subdirectory(csrc/mmdeploy)
 
-if (MMDEPLOY_BUILD_SDK)
+if(MMDEPLOY_BUILD_SDK)
     install(TARGETS MMDeployStaticModules
-            MMDeployDynamicModules
-            MMDeployLibs
-            EXPORT MMDeployTargets)
+        MMDeployDynamicModules
+        MMDeployLibs
+        EXPORT MMDeployTargets)
 
-    if (MMDEPLOY_BUILD_TEST)
+    if(MMDEPLOY_BUILD_TEST)
         add_subdirectory(tests/test_csrc)
-    endif ()
+    endif()
 
-    if (MMDEPLOY_BUILD_SDK_PYTHON_API)
+    if(MMDEPLOY_BUILD_SDK_PYTHON_API)
         add_subdirectory(csrc/mmdeploy/apis/python)
-    endif ()
+    endif()
 
-    if (MMDEPLOY_BUILD_SDK_JAVA_API)
+    if(MMDEPLOY_BUILD_SDK_JAVA_API)
         add_subdirectory(csrc/mmdeploy/apis/java)
-    endif ()
+    endif()
 
-    if (MMDEPLOY_BUILD_EXAMPLES)
+    if(MMDEPLOY_BUILD_EXAMPLES)
         include(${CMAKE_SOURCE_DIR}/cmake/opencv.cmake)
         add_subdirectory(demo/csrc)
-    endif ()
+    endif()
 
     # export MMDeploy package
     install(EXPORT MMDeployTargets
-            FILE MMDeployTargets.cmake
-            DESTINATION lib/cmake/MMDeploy)
+        FILE MMDeployTargets.cmake
+        DESTINATION lib/cmake/MMDeploy)
 
-    if (MMDEPLOY_SPDLOG_EXTERNAL)
+    if(MMDEPLOY_SPDLOG_EXTERNAL)
         set(SPDLOG_DEPENDENCY "find_package(spdlog QUIET)")
-    endif ()
+    endif()
+
     # append backend deps
     mmdeploy_add_deps(trt BACKENDS ${MMDEPLOY_TARGET_BACKENDS} DEPS TENSORRT CUDNN)
     mmdeploy_add_deps(ort BACKENDS ${MMDEPLOY_TARGET_BACKENDS} DEPS ONNXRUNTIME)
     mmdeploy_add_deps(ncnn BACKENDS ${MMDEPLOY_TARGET_BACKENDS} DEPS ncnn)
     mmdeploy_add_deps(openvino BACKENDS ${MMDEPLOY_TARGET_BACKENDS} DEPS InferenceEngine)
-    if (NOT MMDEPLOY_SHARED_LIBS)
+
+    if(NOT MMDEPLOY_SHARED_LIBS)
         mmdeploy_add_deps(pplnn BACKENDS ${MMDEPLOY_TARGET_BACKENDS} DEPS pplnn)
-    endif ()
+    endif()
+
     mmdeploy_add_deps(snpe BACKENDS ${MMDEPLOY_TARGET_BACKENDS} DEPS snpe)
 
     include(CMakePackageConfigHelpers)
+
     # generate the config file that is includes the exports
     configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/MMDeployConfig.cmake.in
-            "${CMAKE_CURRENT_BINARY_DIR}/MMDeployConfig.cmake"
-            INSTALL_DESTINATION "lib/cmake"
-            NO_SET_AND_CHECK_MACRO
-            NO_CHECK_REQUIRED_COMPONENTS_MACRO
-            )
+        "${CMAKE_CURRENT_BINARY_DIR}/MMDeployConfig.cmake"
+        INSTALL_DESTINATION "lib/cmake"
+        NO_SET_AND_CHECK_MACRO
+        NO_CHECK_REQUIRED_COMPONENTS_MACRO
+    )
 
     write_basic_package_version_file(
-            "${CMAKE_CURRENT_BINARY_DIR}/MMDeployConfigVersion.cmake"
-            VERSION "${MMDeploy_VERSION_MAJOR}.${MMDeploy_VERSION_MINOR}"
-            COMPATIBILITY AnyNewerVersion
+        "${CMAKE_CURRENT_BINARY_DIR}/MMDeployConfigVersion.cmake"
+        VERSION "${MMDeploy_VERSION_MAJOR}.${MMDeploy_VERSION_MINOR}"
+        COMPATIBILITY AnyNewerVersion
     )
 
     install(FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/MMDeployConfig.cmake
-            ${CMAKE_CURRENT_BINARY_DIR}/MMDeployConfigVersion.cmake
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/MMDeploy.cmake
-            DESTINATION lib/cmake/MMDeploy
-            )
+        ${CMAKE_CURRENT_BINARY_DIR}/MMDeployConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/MMDeployConfigVersion.cmake
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/MMDeploy.cmake
+        DESTINATION lib/cmake/MMDeploy
+    )
 
-    if (MSVC)
+    if(MSVC)
         install(FILES
-                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/loader.cpp.in
-                DESTINATION lib/cmake/MMDeploy
-                )
-    endif ()
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/loader.cpp.in
+            DESTINATION lib/cmake/MMDeploy
+        )
+    endif()
 
     install(DIRECTORY
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules
-            DESTINATION lib/cmake/MMDeploy
-            )
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules
+        DESTINATION lib/cmake/MMDeploy
+    )
 
-    if (${CMAKE_VERSION} VERSION_LESS "3.17.0")
+    if(${CMAKE_VERSION} VERSION_LESS "3.17.0")
         install(SCRIPT cmake/post-install.cmake)
-    endif ()
-endif ()
+    endif()
+endif()

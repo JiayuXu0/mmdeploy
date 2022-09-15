@@ -41,7 +41,7 @@ MMDEPLOY_API void SetLogger(spdlog::logger *logger);
 #define MMDEPLOY_LEVEL_OFF 6
 
 #if !defined(MMDEPLOY_ACTIVE_LEVEL)
-#define MMDEPLOY_ACTIVE_LEVEL MMDEPLOY_LEVEL_INFO
+#define MMDEPLOY_ACTIVE_LEVEL MMDEPLOY_LEVEL_OFF
 #endif
 
 #endif

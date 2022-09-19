@@ -23,7 +23,10 @@ def main():
     img = cv2.imread(args.image_path)
     detector = Detector(
         model_path=args.model_path, device_name=args.device_name, device_id=0)
+    import time
+    t = time.time()
     bboxes, labels, masks = detector(img)
+    print(time.time()-t)
 
     indices = [i for i in range(len(bboxes))]
     for index, bbox, label_id in zip(indices, bboxes, labels):

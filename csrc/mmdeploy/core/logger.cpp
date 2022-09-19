@@ -50,7 +50,7 @@ std::shared_ptr<spdlog::logger> CreateDefaultLogger() {
 #else
   LoadEnvLevels();
 #endif
-  constexpr const auto logger_name = "mmdeploy";
+  constexpr const auto logger_name = "dbdeploy";
 #if defined(__ANDROID__)
   return spdlog::android_logger_mt(logger_name);
 #elif defined(_MSC_VER)

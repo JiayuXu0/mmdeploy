@@ -36,13 +36,13 @@ Result<void> Model::Init(const std::string& model_path) {
     }
     OUTCOME_TRY(auto meta, impl->ReadMeta());
 
-    //MMDEPLOY_INFO("{} successfully load model {}", entry.name, model_path);
+    MMDEPLOY_INFO("{} successfully load model {}", entry.name, model_path);
     impl_ = std::move(impl);
     meta_ = std::move(meta);
     return success();
   }
 
-  //MMDEPLOY_ERROR("no ModelImpl can read model {}", model_path);
+  MMDEPLOY_ERROR("no ModelImpl can read model {}", model_path);
   return Status(eNotSupported);
 }
 
@@ -95,7 +95,7 @@ Result<void> ModelRegistry::Register(const std::string& name, Creator creator) {
       return Status(eFail);
     }
   }
-  //MMDEPLOY_INFO("Register '{}'", name);
+  MMDEPLOY_INFO("Register '{}'", name);
   entries_.push_back({name, std::move(creator)});
   return success();
 }
